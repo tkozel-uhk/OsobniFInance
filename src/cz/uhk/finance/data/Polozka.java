@@ -1,15 +1,19 @@
 package cz.uhk.finance.data;
 
+import java.time.LocalDate;
+
 /**
  * Polozka osobnich financi
  */
 public class Polozka {
+    private LocalDate datum;
     private String nazev;
     private double castka;
 
     public Polozka() {}
 
-    public Polozka(String nazev, double castka) {
+    public Polozka(LocalDate datum, String nazev, double castka) {
+        this.datum = datum;
         this.nazev = nazev;
         this.castka = castka;
     }
@@ -28,5 +32,13 @@ public class Polozka {
 
     public double getCastka() {
         return castka;
+    }
+
+    public LocalDate getDatum() {
+        return datum;
+    }
+
+    public void setDatum(LocalDate datum) {
+        this.datum = datum;
     }
 }

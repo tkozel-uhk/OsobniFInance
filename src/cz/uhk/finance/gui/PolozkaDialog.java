@@ -6,8 +6,13 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.time.format.FormatStyle;
 
 public class PolozkaDialog extends JDialog {
+    private JTextField tfDatum = new JTextField(10);
     private JTextField tfNazev = new JTextField(15);
     private JTextField tfCastka = new JTextField(10);
     private JButton btOk;
@@ -23,6 +28,13 @@ public class PolozkaDialog extends JDialog {
 
     private void initGui() {
         JPanel pnlCenter = new JPanel(new FlowLayout(FlowLayout.CENTER));
+
+        JLabel labDatum = new JLabel("Datum");
+        labDatum.setLabelFor(tfDatum);
+        labDatum.setDisplayedMnemonic('D');
+        pnlCenter.add(labDatum);
+        pnlCenter.add(tfDatum);
+
         JLabel labNazev = new JLabel("Nazev");
         labNazev.setLabelFor(tfNazev);
         labNazev.setDisplayedMnemonic('N');
@@ -49,7 +61,11 @@ public class PolozkaDialog extends JDialog {
             @Override
             public void actionPerformed(ActionEvent e) {
                 ok = e.getSource() == btOk;
-                setVisible(false);
+                if (ok && validace()) {
+                    setVisible(false);
+                } else if (!ok){ //storno
+                    setVisible(false);
+                }
             }
         };
 
@@ -63,12 +79,36 @@ public class PolozkaDialog extends JDialog {
         pack();
     }
 
+    private boolean validace() {
+        boolean valid = true;
+
+        try {
+            LocalDate datum = LocalDate.parse(tfDatum.getText(), DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT));
+        } catch (DateTimeParseException ex) {
+            JOptionPane.showMessageDialog(this, "Chybny format datumu",
+                    "CHYBA", JOptionPane.ERROR_MESSAGE);
+            valid = false;
+        }
+
+        try {
+            double castka = Double.parseDouble(tfCastka.getText());
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(this, "Chybny format cisla",
+                    "CHYBA", JOptionPane.ERROR_MESSAGE);
+            valid = false;
+        }
+
+        return valid;
+    }
+
     public Polozka vytvorNovouPolozku() {
         tfCastka.setText("0");
         tfNazev.setText("");
+        tfDatum.setText(LocalDate.now().format(DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT)));
         setVisible(true);
         if (ok) {
-            Polozka p = new Polozka(tfNazev.getText(), Double.valueOf(tfCastka.getText()));
+            LocalDate dat = LocalDate.parse(tfDatum.getText(), DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT));
+            Polozka p = new Polozka(dat, tfNazev.getText(), Double.valueOf(tfCastka.getText()));
 
             return p;
         } else {
@@ -79,9 +119,11 @@ public class PolozkaDialog extends JDialog {
     public Polozka editujPolozku(Polozka p) {
         tfNazev.setText(p.getNazev());
         tfCastka.setText(String.valueOf(p.getCastka()));
+        tfDatum.setText(p.getDatum().format(DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT)));
         setVisible(true);
         if (ok) {
-            Polozka pNew = new Polozka(tfNazev.getText(), Double.valueOf(tfCastka.getText()));
+            LocalDate dat = LocalDate.parse(tfDatum.getText(), DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT));
+            Polozka pNew = new Polozka(dat, tfNazev.getText(), Double.valueOf(tfCastka.getText()));
             return pNew;
         } else {
             return null;

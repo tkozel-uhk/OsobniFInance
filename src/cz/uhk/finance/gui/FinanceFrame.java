@@ -8,6 +8,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 
 public class FinanceFrame extends JFrame {
     private JTextArea taVystup = new JTextArea(25,40);
@@ -57,7 +59,8 @@ public class FinanceFrame extends JFrame {
     private void vypisPolozek() {
         taVystup.setText("");
         for(Polozka p : evidence.getPolozky()) {
-            taVystup.append(String.format("%s %.2f\n", p.getNazev(), p.getCastka()));
+            String dats = p.getDatum().format(DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT));
+            taVystup.append(String.format("%s\t%s\t%.2f\n", dats, p.getNazev(), p.getCastka()));
         }
     }
 
