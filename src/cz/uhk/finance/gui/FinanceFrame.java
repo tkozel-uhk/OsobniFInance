@@ -37,6 +37,10 @@ public class FinanceFrame extends JFrame {
 
         JButton btPridej = new JButton("Nova polozka");
         JButton btVypis = new JButton("Vypsat");
+        JButton btEdit = new JButton("Editace");
+        JButton btStav = new JButton("Stav");
+        JButton btPrijmy = new JButton("Prijmy");
+        JButton btVydaje = new JButton("Vydaje");
 
         btPridej.addActionListener(new ActionListener() {
             @Override
@@ -52,8 +56,43 @@ public class FinanceFrame extends JFrame {
             }
         });
 
+        //POZOR: od Javy 8 lze to same zapsat pomoci Lambda vyrazu
+        btEdit.addActionListener((e) -> editace());
+        btStav.addActionListener((e) -> {
+            taVystup.append(String.format("Stav uctu je %.2f\n", evidence.getStavUctu()));
+        });
+        btPrijmy.addActionListener((e) -> {
+            taVystup.append(String.format("Soucet prijmu je %.2f\n", evidence.getPrijmy()));
+        });
+        btVydaje.addActionListener((e) -> {
+            taVystup.append(String.format("Soucet vydaju je %.2f\n", evidence.getVydaje()));
+        });
+
         tb.add(btPridej);
         tb.add(btVypis);
+        tb.add(btEdit);
+        tb.add(btStav);
+        tb.add(btPrijmy);
+        tb.add(btVydaje);
+    }
+
+    private void editace() {
+        String poradiStr = JOptionPane.showInputDialog("Zadejte cislo polozky pro upravu");
+        try {
+            int poradi = Integer.valueOf(poradiStr);
+            poradi--; //zmensime o 1, seznamy indexujeme od 0 !!!
+            if (poradi >=0 && poradi < evidence.getPolozky().size()) { //je index ve spravnem rozsahu
+                Polozka p = new PolozkaDialog(this).editujPolozku(evidence.getPolozky().get(poradi)); //-1 kvuli indexovani od 0
+                if (p != null) {
+                    evidence.getPolozky().set(poradi, p);
+                }
+            } else {
+                JOptionPane.showMessageDialog(this,
+                        "Neplatne cislo polozky", "Chyba", JOptionPane.ERROR_MESSAGE);
+            }
+        } catch (NumberFormatException ex) {
+
+        }
     }
 
     private void vypisPolozek() {
@@ -73,6 +112,12 @@ public class FinanceFrame extends JFrame {
     }
 
     public static void main(String[] args) {
+        //zkusime jiny motiv
+        try {
+            UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
