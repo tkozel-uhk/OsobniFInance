@@ -1,8 +1,6 @@
 package cz.uhk.finance.gui;
 
-import cz.uhk.finance.data.Evidence;
-import cz.uhk.finance.data.EvidenceImpl;
-import cz.uhk.finance.data.Polozka;
+import cz.uhk.finance.data.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -15,6 +13,8 @@ public class FinanceFrame extends JFrame {
     private JTextArea taVystup = new JTextArea(25,40);
 
     private Evidence evidence = new EvidenceImpl();
+
+    private PersistenceManager persistenceManager = new CsvPersistenceManager("data.csv");
 
     public FinanceFrame() {
         super("Osobni finance");
@@ -42,6 +42,9 @@ public class FinanceFrame extends JFrame {
         JButton btPrijmy = new JButton("Prijmy");
         JButton btVydaje = new JButton("Vydaje");
 
+        JButton btUlozit = new JButton("Ulozit");
+        JButton btNacist = new JButton("Nacist");
+
         btPridej.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -68,12 +71,41 @@ public class FinanceFrame extends JFrame {
             taVystup.append(String.format("Soucet vydaju je %.2f\n", evidence.getVydaje()));
         });
 
+        btUlozit.addActionListener((e)->ulozit());
+
+        btNacist.addActionListener((e) -> nacist());
+
         tb.add(btPridej);
         tb.add(btVypis);
         tb.add(btEdit);
         tb.add(btStav);
         tb.add(btPrijmy);
         tb.add(btVydaje);
+        tb.addSeparator();
+        tb.add(btUlozit);
+        tb.add(btNacist);
+
+    }
+
+    private void nacist() {
+        try {
+            evidence = persistenceManager.nacistVse();
+            taVystup.append("Data byla nactena\n");
+        } catch (PersistenceException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(FinanceFrame.this, e.getMessage(), "CHYBA", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void ulozit() {
+
+        try {
+            persistenceManager.ulozitVse(evidence);
+            taVystup.append("Data byla ulozena\n");
+        } catch (PersistenceException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(FinanceFrame.this, e.getMessage(), "CHYBA", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     private void editace() {
